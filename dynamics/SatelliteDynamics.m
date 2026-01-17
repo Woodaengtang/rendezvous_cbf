@@ -30,11 +30,11 @@ classdef SatelliteDynamics < handle
             obj.stateECI = zeros(12, 1); % Initialize state vector in ECI frame
             obj.COE2ECI();
             obj.stateCOE = [obj.a;...
-                            obj.e;...
-                            obj.i;...
-                            obj.Omega;...
-                            obj.omega;...
-                            obj.f0];
+                obj.e;...
+                obj.i;...
+                obj.Omega;...
+                obj.omega;...
+                obj.f0];
 
             obj.time = 0;
             obj.dt = dt;
@@ -48,7 +48,7 @@ classdef SatelliteDynamics < handle
             k2 = obj.dynamics(x_curr + obj.dt/2*k1);
             k3 = obj.dynamics(x_curr + obj.dt/2*k2);
             k4 = obj.dynamics(x_curr + obj.dt*k3);
-            
+
             % Update the current time and state vector
             obj.time = obj.time + obj.dt;
             obj.stateECI = x_curr + (obj.dt/6) * (k1 + 2*k2 + 2*k3 + k4);
@@ -80,7 +80,7 @@ classdef SatelliteDynamics < handle
             % Position in perifocal frame
             p = (h^2 / obj.MU) * (1 / (1 + obj.e * cos(obj.f0))) * [cos(obj.f0); sin(obj.f0); 0];
             obj.stateECI(1:3) = rotm_E2P*p;
-            
+
             % Velocity in perifocal frame
             v = (obj.MU / h) * [-sin(obj.f0); obj.e + cos(obj.f0); 0];
             obj.stateECI(4:6) = rotm_E2P*v;
@@ -96,16 +96,24 @@ classdef SatelliteDynamics < handle
             sinInc = sin(obj.i);
 
             RzOmg = [ cosOmg, sinOmg, 0;...
-                     -sinOmg, cosOmg, 0;...
-                           0,      0, 1];
+                -sinOmg, cosOmg, 0;...
+                0,      0, 1];
             RxInc = [1,       0,      0;...
-                     0,  cosInc, sinInc;...
-                     0, -sinInc, cosInc];
+                0,  cosInc, sinInc;...
+                0, -sinInc, cosInc];
             Rzomg = [cosomg, sinomg, 0;...
-                    -sinomg, cosomg, 0;...
-                          0,      0, 1];
+                -sinomg, cosomg, 0;...
+                0,      0, 1];
 
             R = (Rzomg*RxInc*RzOmg)';
-        end     
+        end
+
+        function f_tb = gravitational_force(obj, r_t)
+            % Compute gravitational force acting on the target satellite in target frame
+            r = norm(r_t);
+            f_t = -obj.MU * r_t / r^3;
+            att = obj.stateECI(7:9);
+            f_tb = angle2dcm(att(3), att(2), att(1), 'ZYX') * f_t;
+        end
     end
 end
