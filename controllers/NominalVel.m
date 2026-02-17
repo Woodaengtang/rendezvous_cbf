@@ -67,27 +67,29 @@ classdef NominalVel < handle
         end
         
         % ========================================================
-        %%%%%%%%%% CLF Functions (V = 0.5 * eV' * eV) %%%%%%%%%%
+        % CLF Functions (V = 0.5 * rho' * rho + 0.5 * eV' * eV) 
         % ========================================================
         function update_clf(obj, state, V_d)
             % Compute value of control lyapunov function V
+            rho = state(7:9);
             vel = state(10:12);
             eV = V_d - vel;
-            obj.V = 0.5 * (eV' * eV);
+            obj.V = 0.5 * (rho' * rho + eV' * eV);
             
             % Compute LfV and LgV
             if isnan(obj.Vd_prev)
                 obj.Vd_prev = V_d;
             end
-            dotVd = (vel - obj.Vd_prev)./obj.dt;
-            obj.Vd_prev = V_d;
-
-            S_omega_c = obj.RelativeChaser.skew(obj.RelativeChaser.omg_c);
-            obj.LfV = eV' * (S_omega_c * vel + obj.RelativeChaser.Target.gravitational_force() + obj.RelativeChaser.gravitational_force());
-            % obj.LfV = eV' * (dotVd + S_omega_c * vel + obj.RelativeChaser.Target.gravitational_force() + obj.RelativeChaser.gravitational_force());
-            obj.LgV = -eV'./obj.RelativeChaser.m_c;
+            obj.RelativeChaser.get_chaser_omg();
+            Omega_wc = obj.RelativeChaser.skew(obj.RelativeChaser.omg_c);
+            first_term = rho' * (vel - Omega_wc * rho);
+            R_tc = obj.RelativeChaser.get_Rt_c(obj.RelativeChaser.state(1:3));
+            dv_t = obj.RelativeChaser.Target.gravitational_force();
+            D2 = obj.RelativeChaser.gravitational_force() - R_tc * dv_t;
+            second_term = eV' * (Omega_wc*vel - D2);
+            obj.LfV = first_term + second_term;
+            obj.LgV = -eV'/obj.RelativeChaser.m_c;
         end
-
         
         % =========================================================
         % CBF Functions (h in Target Frame)

@@ -21,7 +21,6 @@ classdef RelativeDynamics < handle
         Target  SatelliteDynamics
     end
     
-    
     methods
         % Constructor
         function obj = RelativeDynamics(initial_state, dt, targetSatellite)
@@ -70,26 +69,6 @@ classdef RelativeDynamics < handle
 
             obj.get_chaser_pos();
             obj.get_chaser_euler();
-        end
-
-        
-        % Math Helpers
-        function S = skew(~, x)
-            S = [0,    -x(3),  x(2);
-                 x(3),  0,    -x(1);
-                -x(2),  x(1),  0];
-        end
-        
-        function G = get_G_matrix(obj, s)
-            s_sq = s' * s;
-            G = 0.25 * ((1 - s_sq)*eye(3) + 2*obj.skew(s) + 2*(s*s'));
-        end
-        
-        function R = get_Rt_c(obj, s)
-            s_sq = s' * s;
-            Omega_s = obj.skew(s);
-            denom = (1 + s_sq)^2;
-            R = eye(3) - (4*(1-s_sq)/denom)*Omega_s + (8/denom)*(Omega_s*Omega_s);
         end
         
         % Dynamics (Internal Calculation)
@@ -182,7 +161,7 @@ classdef RelativeDynamics < handle
         end
 
         function get_chaser_omg(obj)
-            R_tc = obj.get_Rt_c(x(1:3));
+            R_tc = obj.get_Rt_c(obj.state(1:3));
             w_t = obj.Target.stateECI(10:12);
             w_curr = obj.state(4:6);
             Rw_t = R_tc * w_t;
@@ -198,9 +177,8 @@ classdef RelativeDynamics < handle
         end
 
         function c1 = get_C1(obj)
-            s = obj.state(1:3);
             w = obj.state(4:6);
-            R_tc = obj.get_Rt_c(s);
+            R_tc = obj.get_Rt_c(obj.state(1:3));
             w_t = obj.Target.stateECI(10:12);
             Rw_t = R_tc * w_t;
             w_c = w + Rw_t; % Chaser relative angular velocity
@@ -221,6 +199,25 @@ classdef RelativeDynamics < handle
             S_Rwt = obj.skew(Rw_t);
 
             d1 = -S_Rwt*(obj.J_c*Rw_t) - obj.J_c*(R_tc*dw_t);
+        end
+
+        % Math Helpers
+        function S = skew(~, x)
+            S = [0,    -x(3),  x(2);
+                 x(3),  0,    -x(1);
+                -x(2),  x(1),  0];
+        end
+        
+        function G = get_G_matrix(obj, s)
+            s_sq = s' * s;
+            G = 0.25 * ((1 - s_sq)*eye(3) + 2*obj.skew(s) + 2*(s*s'));
+        end
+        
+        function R = get_Rt_c(obj, s)
+            s_sq = s' * s;
+            Omega_s = obj.skew(s);
+            denom = (1 + s_sq)^2;
+            R = eye(3) - (4*(1-s_sq)/denom)*Omega_s + (8/denom)*(Omega_s*Omega_s);
         end
     end
 end

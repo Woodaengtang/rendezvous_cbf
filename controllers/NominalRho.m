@@ -12,9 +12,9 @@ classdef NominalRho < handle
         V       % Value of CLF
         LfV     % Lie derivative of V along f
         LgV     % Lie derivative of V along g
-        B       % Value of CBF
-        LfB     % Lie derivative of h along f
-        LgB     % Lie derivative of h along g
+        h       % Value of CBF
+        Lfh     % Lie derivative of h along f
+        Lgh     % Lie derivative of h along g
         
         Alpha   % CBF Parameter: Cone shape factor
         Delta   % CBF Parameter: Shift along x-axis (Target frame)
@@ -34,9 +34,9 @@ classdef NominalRho < handle
             obj.V   = 0;
             obj.LfV = 0;
             obj.LgV = zeros([1, 3]);
-            obj.B   = 0;
-            obj.LfB = 0;
-            obj.LgB = zeros([1, 3]);
+            obj.h   = 0;
+            obj.Lfh = 0;
+            obj.Lgh = zeros([1, 3]);
             
             % Geometric Parameters for the Barrier Function
             obj.Alpha = 0.02; 
@@ -55,9 +55,9 @@ classdef NominalRho < handle
             quadprog_f(1:3) = 0;
 
             A = [obj.LgV, -1;...
-                 -obj.LgB, 0];
+                 -obj.Lgh, 0];
             b = [-obj.gamma * obj.V - obj.LfV;...
-                 obj.alpha * obj.B - obj.LfB];
+                 obj.alpha * obj.h - obj.Lfh];
             [output, ~, exitflag, ~] = quadprog(quadprog_H, quadprog_f, A, b, [], [], [], [], [], obj.qp_options);
             Vd = output(1:3);
             slack = output(end);
@@ -87,7 +87,6 @@ classdef NominalRho < handle
             obj.LgV = rho';
         end
 
-        
         % =========================================================
         % CBF Functions (h in Target Frame)
         % =========================================================
@@ -98,7 +97,7 @@ classdef NominalRho < handle
             R_tc = obj.RelativeChaser.get_Rt_c(state(1:3));
             r_t = R_tc' * state(7:9); 
             
-            obj.B = obj.Alpha * (r_t(1) + obj.Delta)^3 - r_t(2)^2 - r_t(3)^2;
+            obj.h = obj.Alpha * (r_t(1) + obj.Delta)^3 - r_t(2)^2 - r_t(3)^2;
             
             % Compute Lfh and Lgh
             dh_dxt = 3 * obj.Alpha * (r_t(1) + obj.Delta)^2;
@@ -110,8 +109,8 @@ classdef NominalRho < handle
             S_omega_c = obj.RelativeChaser.skew(obj.RelativeChaser.omg_c);
             rho = state(7:9);
 
-            obj.LfB = grad_h_rt * (-S_omega * R_tc' * rho - R_tc' * S_omega_c * rho);
-            obj.LgB = grad_h_rt * R_tc';
+            obj.Lfh = grad_h_rt * (-S_omega * R_tc' * rho - R_tc' * S_omega_c * rho);
+            obj.Lgh = grad_h_rt * R_tc';
         end
     end
 end
