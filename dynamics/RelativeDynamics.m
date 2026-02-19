@@ -209,8 +209,7 @@ classdef RelativeDynamics < handle
         end
         
         function G = get_G_matrix(obj, s)
-            s_sq = s' * s;
-            G = 0.25 * ((1 - s_sq)*eye(3) + 2*obj.skew(s) + 2*(s*s'));
+            G = 0.25 * ((1 - s' * s)*eye(3) + 2*obj.skew(s) + 2*(s*s'));
         end
         
         function R = get_Rt_c(obj, s)
