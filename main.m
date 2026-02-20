@@ -27,6 +27,8 @@ for i = simCfg.sim_time
     simLogger.loggerControl.force.log_data(u_ctrl.f);
     simLogger.loggerControl.omg_d.log_data(Controller.ref_omg);
     simLogger.loggerControl.moment.log_data(u_ctrl.tau);
+    simLogger.loggerLyapunov.V.log_data([Controller.rhoV; Controller.velV; Controller.sigV; Controller.omgV]);
+    simLogger.loggerBarrier.h.log_data(Controller.barrier_value());
 end
 
 run("plot_sim.m");
