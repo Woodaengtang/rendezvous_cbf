@@ -1,6 +1,27 @@
-classdef ClfCbfQp < ClfQp
-    % Backstepping-based Control Lyapunov Function and Control Barrier Function Quadratic Program (CLF-CBF-QP) controller
+classdef CbfQp < handle
     properties
+        ref_vel
+        prev_ref_vel
+        ref_omg
+        prev_ref_omg
+
+        gamma_rho
+        gamma_vel
+        gamma_sig
+        gamma_omg
+
+        torque_lb
+        torque_ub
+        force_lb
+        force_ub
+
+        qp_option
+        p_weight
+
+        a_h
+        delta_h
+
+        RD  RelativeDynamics
 
         alpha_rho
         alpha_vel
@@ -20,8 +41,31 @@ classdef ClfCbfQp < ClfQp
         partial
     end
     methods
-        function obj = ClfCbfQp(ControlCfg, relativeDynamics)
-            obj@ClfQp(ControlCfg, relativeDynamics);
+        function obj = CbfQp(ControlCfg, relativeDynamics)
+            obj.ref_vel = 0;
+            obj.prev_ref_vel = NaN;
+            obj.ref_omg = 0;
+            obj.prev_ref_omg = NaN;
+
+            obj.gamma_rho  = ControlCfg.gamma_rho;
+            obj.gamma_vel  = ControlCfg.gamma_vel;
+            obj.gamma_sig  = ControlCfg.gamma_sig;
+            obj.gamma_omg  = ControlCfg.gamma_omg;
+
+            obj.torque_lb = [ControlCfg.torque_lb(:); 0];
+            obj.torque_ub = [ControlCfg.torque_ub(:); Inf];
+            obj.force_lb = [ControlCfg.force_lb(:); 0];
+            obj.force_ub = [ControlCfg.force_ub(:); Inf];
+
+            obj.qp_option = optimoptions('quadprog', 'Display', 'off');
+
+            obj.a_h = ControlCfg.a_h;
+            obj.delta_h = ControlCfg.delta_h;
+
+            obj.p_weight = 1e3;
+
+            obj.RD = relativeDynamics;
+
 
             obj.alpha_rho = ControlCfg.alpha_rho;
             obj.alpha_vel = ControlCfg.alpha_vel;
@@ -39,6 +83,7 @@ classdef ClfCbfQp < ClfQp
             obj.partial = struct('dh_drho', [], 'd2h_drho2', []);
         end
 
+
         function u_ctrl = command(obj)
             obj.partial_rho_t();
             obj.ref_vel_cal();
@@ -46,24 +91,23 @@ classdef ClfCbfQp < ClfQp
             u_ctrl = struct('f', obj.command_force(),...
                             'tau', obj.command_torque());
         end
-
         function ref_vel_cal(obj)
             ref_vel_cal@ClfQp(obj);
             obj.vel_nom = obj.ref_vel;
             obj.h_rho = obj.barrier_value();
 
             H = eye(3);
-            f = -2*obj.vel_nom; 
+            f = -obj.vel_nom; 
 
             Lgh = obj.partial.dh_drho * obj.RD.R_tc';
             w_t = obj.RD.Target.stateECI(10:12);
             rho = obj.RD.state(7:9);
-
+            
             Lfh = -obj.partial.dh_drho * obj.RD.R_tc' * obj.RD.skew(obj.RD.R_tc*w_t) * rho;
-
+            
             A = -Lgh;
             b = Lfh + obj.alpha_rho * obj.h_rho;
-
+            
             % Solve
             [v_safe, ~, exitflag] = quadprog(H, f, A, b, [], [], [], [], [], obj.qp_option);
             if exitflag ~= 1
@@ -73,9 +117,9 @@ classdef ClfCbfQp < ClfQp
             obj.ref_vel = v_safe;
         end
         
-        function ref_omg_cal(obj)
-            ref_omg_cal@ClfQp(obj);
-        end
+        % function ref_omg_cal(obj)
+        %     ref_omg_cal@ClfQp(obj);
+        % end
 
         function input_F = command_force(obj)
             obj.f_nom = command_force@ClfQp(obj);
@@ -98,13 +142,13 @@ classdef ClfCbfQp < ClfQp
             h_2 = dot_h + obj.alpha_rho * h;
             
             H = eye(3);
-            f = -2*obj.f_nom;
+            f = -obj.f_nom;
 
             A = -Lgh;
             b = Lfh + obj.alpha_vel * h_2;
             
             % Solve
-            [force_safe, ~, exitflag] = quadprog(H, f, A, b, [], [], obj.force_lb(1:3), obj.force_ub(1:3), [], obj.qp_option);
+            [force_safe, ~, exitflag] = quadprog(H, f, A, b, [], [], obj.force_lb, obj.force_ub, [], obj.qp_option);
             if exitflag ~= 1
                 warning('Force CBF-QP did not converge, using nominal control');
                 force_safe = obj.f_nom;
@@ -112,40 +156,6 @@ classdef ClfCbfQp < ClfQp
             input_F = force_safe;
             obj.f_safe = input_F;
         end
-        
-        % function input_M = command_torque(obj)
-        %     sigma = obj.RD.state(1:3);
-        %     omega = obj.RD.state(4:6);
-        %     if isnan(obj.prev_ref_omg)
-        %         obj.prev_ref_omg = obj.ref_omg;
-        %     end
-        %     domg_r = (obj.ref_omg - obj.prev_ref_omg) / obj.RD.dt;
-        %     obj.prev_ref_omg = obj.ref_omg;
-        %     err_omg = omega - obj.ref_omg;
-        % 
-        %     G = obj.RD.get_G_matrix(sigma);
-        %     C1 = obj.RD.get_C1();
-        %     D1 = obj.RD.get_D1();
-        % 
-        %     % Lie Derivatives for V_omg = V_sig + 0.5 * err_omg' * err_omg
-        %     LfV = sigma' * G * omega + err_omg' * (obj.RD.J_c\(C1*omega + D1) - domg_r);
-        %     LgV = err_omg' / obj.RD.J_c;
-        %     obj.omgV = 0.5 * (err_omg' * err_omg);
-        %     obj.V2.rel_att_omg = obj.sigV + obj.omgV;
-        % 
-        %     H = eye(3);
-        %     f = zeros(3,1);
-        % 
-        %     A = LgV;
-        %     b = -obj.gamma_omg * obj.V2.rel_att_omg - LfV;
-        % 
-        %     [input_M , ~, exitflag] = quadprog(H, f, A, b, [], [], obj.torque_lb(1:3), obj.torque_ub(1:3), [], obj.qp_option);
-        % 
-        %     if exitflag == -2
-        %         % Fallback
-        %         error('QP solver failed to find a solution for command_torque');
-        %     end
-        % end
 
         function partial_rho_t(obj)
             rho = obj.RD.state(7:9);
@@ -159,6 +169,11 @@ classdef ClfCbfQp < ClfQp
                          0, 0, -2];
             obj.partial.dh_drho = grad_rho_t;
             obj.partial.d2h_drho2 = hessian_rho_t;
+        end
+
+        function h = barrier_value(obj)
+            r_t = (obj.RD.R_tc')*obj.RD.state(7:9);
+            h = obj.a_h*(r_t(1) - obj.delta_h)^3 - r_t(2)^2 - r_t(3)^2;
         end
     end
 end

@@ -31,7 +31,9 @@ classdef ClfQp < handle
         force_ub
 
         qp_option
-        p_weight
+        
+        p_weight_f
+        p_weight_m
 
         a_h
         delta_h
@@ -71,7 +73,8 @@ classdef ClfQp < handle
             obj.a_h = ControlCfg.a_h;
             obj.delta_h = ControlCfg.delta_h;
 
-            obj.p_weight = 1e3;
+            obj.p_weight_f = 1e3;
+            obj.p_weight_m = 1e4;
 
             obj.RD = relativeDynamics;
         end
@@ -194,8 +197,9 @@ classdef ClfQp < handle
             obj.velV = 0.5 * (err_vel' * err_vel);
             obj.V2.rel_pos_vel = obj.rhoV + obj.velV;
             
-            H = blkdiag(eye(3), obj.p_weight);
+            H = blkdiag(eye(3), 0);
             f = zeros(4,1);
+            f(4) = obj.p_weight_f;
             
             A = [LgV, -1]; 
             b = -obj.gamma_vel * obj.V2.rel_pos_vel - LfV;
@@ -229,9 +233,10 @@ classdef ClfQp < handle
             obj.omgV = 0.5 * (err_omg' * err_omg);
             obj.V2.rel_att_omg = obj.sigV + obj.omgV;
             
-            H = blkdiag(eye(3), obj.p_weight);
+            H = blkdiag(eye(3), 0);
             f = zeros(4,1);
-            
+            f(4) = obj.p_weight_m;
+
             A = [LgV, -1];
             b = -obj.gamma_omg * obj.V2.rel_att_omg - LfV;
             
