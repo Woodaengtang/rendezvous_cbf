@@ -5,18 +5,18 @@ addpath(genpath(pwd));
 fig_size = [600, 450];
 line_width = 1.5;
 
-load('assets\nominal_clfqp\simLogger_20260309_185447.mat');
+load('assets\nominal_clfqp\simLogger_20260312_184550.mat');
 nominal = struct('sig', simLogger.loggerRelative.state.log(1:3, :),...
                  'rho', simLogger.loggerRelative.state.log(7:9, :));
 
 
-load('assets\ccbf\simLogger_20260309_185911.mat');
+load('assets\ccbf\simLogger_20260313_125027.mat');
 ccbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
               'force', simLogger.loggerControl.force.log,...
               'sig', simLogger.loggerRelative.state.log(1:3, :),...
               'rho', simLogger.loggerRelative.state.log(7:9, :));
 
-load('assets\hocbf\simLogger_20260309_185707.mat');
+load('assets\hocbf\simLogger_20260313_125227.mat');
 hocbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
                'force', simLogger.loggerControl.force.log,...
                'sig', simLogger.loggerRelative.state.log(1:3, :),...
@@ -79,24 +79,14 @@ for i = 1:simCfg.sim_len
     hocbf_traj(:, i) = (get_R_tc(hocbf_sigma))'*hocbf_rho;
 end
 
-offset = 1;
-x_min = 1;
-x_max = max(nominal_traj(1,:)) + offset;
-x = linspace(x_min, x_max, 100);
-theta = linspace(0, 2*pi, 50);
-[X, Theta] = meshgrid(x, theta);
-R = sqrt(controlCfg.a_h*(X - controlCfg.delta_h).^3);
-Y = R .* cos(Theta);
-Z = R .* sin(Theta);
-
 rtPlot = figure();
 rtPlot.Theme = 'light';
-rtPlot.Position(3:4) = fig_size.*3/2;
+rtPlot.Position(3:4) = [947, 506];
 hold on; grid on;
 plot3(ccbf_traj(1, :), ccbf_traj(2, :), ccbf_traj(3, :), 'LineWidth', line_width);
 plot3(hocbf_traj(1, :), hocbf_traj(2, :), hocbf_traj(3, :), 'LineWidth', line_width);
 plot3(nominal_traj(1, :), nominal_traj(2, :), nominal_traj(3, :), 'LineWidth', line_width);
-surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'FaceColor', 'r');
+% Surface plotting removed as requested
 
 meshData = readSurfaceMesh('SmallSat.glb');
 
@@ -113,11 +103,13 @@ trisurf(F, V(:,1), V(:,2), V(:,3), ...
       'FaceLighting', 'gouraud');
 
 camlight('headlight');
-legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller', '', ''}, 'Location', 'best');
+legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller'}, 'Location', 'best');
 
-view(3);
+% view(3);
+view([-26.5, 25.5])
 xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
-xlim([-5, 30]); ylim([-20, 20]); zlim([-20, 20]);
+% xlim([-5, 30]); ylim([-20, 20]); zlim([-20, 20]);
+axis equal;
 
 %%
 

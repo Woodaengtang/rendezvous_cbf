@@ -199,8 +199,9 @@ barrierPlot = figure();
 barrierPlot.Theme = 'light';
 barrierPlot.Position(3:4) = fig_size;
 hold on; grid on;
-plot(simCfg.sim_time, simLogger.loggerBarrier.h.log(1,:), 'LineWidth', line_width);
-plot(simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r-', 'LineWidth', line_width);
+hPlot1 = plot(simCfg.sim_time, simLogger.loggerBarrier.h.log(1,:), 'LineWidth', line_width);
+hPlot2 = plot(simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r-', 'LineWidth', line_width);
+uistack(hPlot1, 'top');
 ylabel('h', 'Interpreter', 'tex');
 xlabel('Time (s)', 'Interpreter', 'tex');
 saveas(gcf, 'assets/barrier_plot.png');
@@ -283,12 +284,13 @@ if sim_flag
     
     ScenarioViewer = satelliteScenarioViewer(sc, CameraReferenceFrame='Inertial');
     ScenarioViewer.Position(3:4) = [1600, 900];
-    ScenarioViewer.PlaybackSpeedMultiplier = 1.5;
+    ScenarioViewer.PlaybackSpeedMultiplier = 3;
     target_sat.Visual3DModel = 'SmallSat.glb';
     target_sat.Visual3DModelScale = 0.8;
     chaser_sat.Visual3DModel = 'SmallSat.glb';
     chaser_sat.Visual3DModelScale = 0.8;
-    % hide(target_sat.Orbit);
+    hide(target_sat.Orbit);
+    hide(chaser_sat.Orbit);
     play(sc);
     camtarget(ScenarioViewer, target_sat);
 end

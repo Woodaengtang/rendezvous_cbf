@@ -54,7 +54,7 @@ classdef ClfCbfQp < ClfQp
             obj.h_rho = obj.barrier_value();
 
             H = eye(3);
-            f = -2*obj.vel_nom; 
+            f = -obj.vel_nom; 
 
             Lgh = obj.partial.dh_drho * obj.RD.R_tc';
             w_t = obj.RD.Target.stateECI(10:12);
@@ -95,7 +95,7 @@ classdef ClfCbfQp < ClfQp
             h_2 = dot_h + obj.alpha_rho * h;
             
             H = eye(3);
-            f = -2*obj.f_nom;
+            f = -obj.f_nom;
 
             A = -Lgh;
             b = Lfh + obj.alpha_vel * h_2;
@@ -103,9 +103,7 @@ classdef ClfCbfQp < ClfQp
             % Solve
             [force_safe, ~, exitflag] = quadprog(H, f, A, b, [], [], obj.force_lb(1:3), obj.force_ub(1:3), [], obj.qp_option);
         
-            if exitflag == 0
-                warning('Force CBF-QP exceeds max iteration number');
-            elseif exitflag == -2
+            if exitflag ~= 1
                 warning('Force CBF-QP did not converge, using nominal control');
                 force_safe = obj.f_nom;
             end

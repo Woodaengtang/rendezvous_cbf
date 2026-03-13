@@ -7,8 +7,8 @@ simLogger = LoggerCfg(simCfg.sim_len);
 controlCfg = ControlCfg();
 
 TargetSatellite = SatelliteDynamics(simCfg.target_init_state, simCfg.dt);
-% ChaserSatellite = RelativeDynamics(simCfg.chaser_init_state, simCfg.dt, TargetSatellite);
-ChaserSatellite = StochasticRelative(simCfg.chaser_init_state, simCfg.dt, TargetSatellite);
+ChaserSatellite = RelativeDynamics(simCfg.chaser_init_state, simCfg.dt, TargetSatellite);
+% ChaserSatellite = StochasticRelative(simCfg.chaser_init_state, simCfg.dt, TargetSatellite);
 % Controller = ClfQp(controlCfg, ChaserSatellite);
 Controller = ClfCbfQp(controlCfg, ChaserSatellite);
 

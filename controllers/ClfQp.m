@@ -206,7 +206,9 @@ classdef ClfQp < handle
             
             [sol, ~, exitflag] = quadprog(H, f, A, b, [], [], obj.force_lb, obj.force_ub, [], obj.qp_option);
             
-            if exitflag == -2 || isempty(sol)
+            if exitflag == -2
+                warning('Exit flag -2 occured!')
+            elseif isempty(sol)
                 error('QP solver failed to find a solution for command_force even with slack variable');
             end
             
@@ -242,8 +244,10 @@ classdef ClfQp < handle
             
             [sol , ~, exitflag] = quadprog(H, f, A, b, [], [], obj.torque_lb, obj.torque_ub, [], obj.qp_option);
             
-            if exitflag == -2 || isempty(sol)
-                error('QP solver failed to find a solution for command_torque even with slack variable');
+            if exitflag == -2
+                warning('Exit flag -2 occured!')
+            elseif isempty(sol)
+                error('QP solver failed to find a solution for command_force even with slack variable');
             end
             
             input_M = sol(1:3);
