@@ -6,6 +6,7 @@ classdef SimCfg < handle
         sim_len
         target_init_state
         chaser_init_state
+        varepsilon
     end
     methods
         function obj = SimCfg()
@@ -23,6 +24,10 @@ classdef SimCfg < handle
                                             'omega', [0.05; -0.03; 0.07],...
                                             'rho', [23.6; -8.3; 19.2],...
                                             'vel', [-0.2; -0.3; -0.1]);
+            obj.varepsilon = struct('sig_rho', 0.05,...
+                                    'sig_vel', 0.01,...
+                                    'sig_mrp', deg2rad(1),...
+                                    'sig_omg', deg2rad(0.5));
         end
     end
 end

@@ -14,8 +14,8 @@ classdef StochasticRelative < RelativeDynamics
     end
 
     methods
-        function obj = StochasticRelative(initial_state, dt, targetSatellite)
-            obj@RelativeDynamics(initial_state, dt, targetSatellite);
+        function obj = StochasticRelative(sim_cfg, targetSatellite)
+            obj@RelativeDynamics(sim_cfg, targetSatellite);
             
             obj.sig_rho = 0.05;
             obj.sig_vel = 0.01;

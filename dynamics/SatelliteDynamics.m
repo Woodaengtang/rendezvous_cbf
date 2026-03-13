@@ -17,7 +17,8 @@ classdef SatelliteDynamics < handle
     end
 
     methods
-        function obj = SatelliteDynamics(init_coe, dt)
+        function obj = SatelliteDynamics(sim_cfg)
+            init_coe = sim_cfg.target_init_state;
             obj.a       = init_coe.a;
             obj.e       = init_coe.e;
             obj.i       = init_coe.i;
@@ -37,7 +38,7 @@ classdef SatelliteDynamics < handle
                 obj.f0];
 
             obj.time = 0;
-            obj.dt = dt;
+            obj.dt = sim_cfg.dt;
         end
 
         function step(obj)
