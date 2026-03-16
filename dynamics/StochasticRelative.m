@@ -7,38 +7,33 @@ classdef StochasticRelative < RelativeDynamics
         sig_mrp
         sig_omg
 
-        eps_rho
-        eps_vel
-        eps_mrp
-        eps_omg
+        mu_rho
+        mu_vel
+        mu_mrp
+        mu_omg
     end
 
     methods
         function obj = StochasticRelative(sim_cfg, targetSatellite)
             obj@RelativeDynamics(sim_cfg, targetSatellite);
             
-            obj.sig_rho = 0.05;
-            obj.sig_vel = 0.01;
-            obj.sig_mrp = deg2rad(1);
-            obj.sig_omg = deg2rad(0.5);
+            obj.sig_rho = sim_cfg.sigma.rho;
+            obj.sig_vel = sim_cfg.sigma.vel;
+            obj.sig_mrp = sim_cfg.sigma.mrp;
+            obj.sig_omg = sim_cfg.sigma.omg;
 
-            % obj.sig_rho = 0.005;
-            % obj.sig_vel = 0.01;
-            % obj.sig_mrp = 0.002;
-            % obj.sig_omg = 0.0005;
-
-            obj.eps_rho = 0;
-            obj.eps_vel = 0;
-            obj.eps_mrp = 0;
-            obj.eps_omg = 0;
+            obj.mu_rho = sim_cfg.mu.rho;
+            obj.mu_vel = sim_cfg.mu.vel;
+            obj.mu_mrp = sim_cfg.mu.mrp;
+            obj.mu_omg = sim_cfg.mu.omg;
         end
 
         function dstate = dynamics(obj, x, u_ctrl, u_dist)
             dstate_ = dynamics@RelativeDynamics(obj, x, u_ctrl, u_dist);
-            dstate = dstate_ + [normrnd(obj.eps_mrp, obj.sig_mrp, 3, 1);...
-                                normrnd(obj.eps_omg, obj.sig_omg, 3, 1);...
-                                normrnd(obj.eps_rho, obj.sig_rho, 3, 1);...
-                                normrnd(obj.eps_vel, obj.sig_vel, 3, 1)];
+            dstate = dstate_ + [normrnd(obj.mu_mrp, obj.sig_mrp);...
+                                normrnd(obj.mu_omg, obj.sig_omg);...
+                                normrnd(obj.mu_rho, obj.sig_rho);...
+                                normrnd(obj.mu_vel, obj.sig_vel)];
         end
 
         function step(obj, u_ctrl, u_dist)

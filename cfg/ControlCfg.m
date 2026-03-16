@@ -18,6 +18,9 @@ classdef ControlCfg < handle
         alpha_sig
         alpha_omg
 
+        eta_rho
+        eta_vel
+
         a_h
         delta_h
 
@@ -42,6 +45,9 @@ classdef ControlCfg < handle
             obj.alpha_vel = 0.1;
             obj.alpha_sig = 1;
             obj.alpha_omg = 1;
+
+            obj.eta_rho = 0.9;
+            obj.eta_vel = 0.9;
 
             obj.a_h = 0.1;
             obj.delta_h = 1;
