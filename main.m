@@ -8,9 +8,10 @@ controlCfg = ControlCfg();
 
 TargetSatellite = SatelliteDynamics(simCfg);
 
-% ChaserSatellite = RelativeDynamics(simCfg, TargetSatellite);
-ChaserSatellite = StochasticRelative(simCfg, TargetSatellite);
+ChaserSatellite = RelativeDynamics(simCfg, TargetSatellite);
+% ChaserSatellite = StochasticRelative(simCfg, TargetSatellite);
 
+% Controller = ClfQp(controlCfg, ChaserSatellite);
 % Controller = HOCBF(controlCfg, ChaserSatellite);
 Controller = CCBF(controlCfg, ChaserSatellite);
 

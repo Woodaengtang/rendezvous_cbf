@@ -39,8 +39,6 @@ classdef ControlCfg < handle
             obj.force_lb = [-20; -20; -20];
             obj.force_ub = [20; 20; 20];
 
-            % obj.alpha_rho = 0.2;
-            % obj.alpha_vel = 0.2;
             obj.alpha_rho = 0.8;
             obj.alpha_vel = 0.1;
             obj.alpha_sig = 1;

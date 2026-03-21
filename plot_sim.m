@@ -228,7 +228,7 @@ rtPlot.Theme = 'light';
 rtPlot.Position(3:4) = fig_size;
 hold on; grid on;
 plot3(rt(1, :), rt(2, :), rt(3, :), 'LineWidth', line_width);
-surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.3, 'FaceColor', 'r');
+% surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.3, 'FaceColor', 'r');
 
 meshData = readSurfaceMesh('SmallSat.glb');
 
@@ -248,7 +248,7 @@ camlight('headlight');
 
 view(3);
 xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
-xlim([-5, 30]); ylim([-20, 20]); zlim([-20, 20]);
+% xlim([-5, 30]); ylim([-20, 20]); zlim([-20, 20]);
 saveas(gcf, 'assets/rt_plot.png');
 
 %%
