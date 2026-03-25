@@ -20,13 +20,13 @@ classdef HOCBF < ClfQp
         partial
     end
     methods
-        function obj = HOCBF(ControlCfg, relativeDynamics)
-            obj@ClfQp(ControlCfg, relativeDynamics);
+        function obj = HOCBF(Cfg, relativeDynamics)
+            obj@ClfQp(Cfg, relativeDynamics);
 
-            obj.alpha_rho = ControlCfg.alpha_rho;
-            obj.alpha_vel = ControlCfg.alpha_vel;
-            obj.alpha_sig = ControlCfg.alpha_sig;
-            obj.alpha_omg = ControlCfg.alpha_omg;
+            obj.alpha_rho = Cfg.alpha_rho;
+            obj.alpha_vel = Cfg.alpha_vel;
+            obj.alpha_sig = Cfg.alpha_sig;
+            obj.alpha_omg = Cfg.alpha_omg;
 
             obj.h_rho = NaN;
             obj.h_vel = NaN;

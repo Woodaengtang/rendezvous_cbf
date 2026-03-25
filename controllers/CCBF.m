@@ -20,13 +20,13 @@ classdef CCBF < ClfQp
     end
 
     methods
-        function obj = CCBF(ControlCfg, relativeDynamics)
-            obj@ClfQp(ControlCfg, relativeDynamics);
+        function obj = CCBF(Cfg, relativeDynamics)
+            obj@ClfQp(Cfg, relativeDynamics);
 
-            obj.alpha_rho = ControlCfg.alpha_rho;
-            obj.alpha_vel = ControlCfg.alpha_vel;
-            obj.alpha_sig = ControlCfg.alpha_sig;
-            obj.alpha_omg = ControlCfg.alpha_omg;
+            obj.alpha_rho = Cfg.alpha_rho;
+            obj.alpha_vel = Cfg.alpha_vel;
+            obj.alpha_sig = Cfg.alpha_sig;
+            obj.alpha_omg = Cfg.alpha_omg;
 
             obj.h_rho = NaN;
             obj.h_vel = NaN;
@@ -39,13 +39,32 @@ classdef CCBF < ClfQp
             obj.partial = struct('dh_drho', [], 'd2h_drho2', []);
             obj.RD = relativeDynamics;
         end
-
+        
         function u_ctrl = command(obj)
+            % 현재 연결된 동역학 모델(Plant)이 관측 상태(state_obs)를 지원하는지 확인
+            has_obs = isprop(obj.RD, 'state_obs') && ~isempty(obj.RD.state_obs);
+
+            if has_obs
+                % [State Swapping 트릭] 참값 백업 및 관측 상태 덮어쓰기
+                true_state = obj.RD.state;
+                true_R_tc = obj.RD.R_tc;
+
+                obj.RD.state = obj.RD.state_obs;
+                obj.RD.R_tc = obj.RD.get_R_tc(obj.RD.state_obs(1:3));
+            end
+
+            % 편미분 및 제어 명령 계산 (has_obs가 true면 관측값 기반으로 계산됨!)
             obj.partial_rho_t();
             obj.ref_vel_cal();
             obj.ref_omg_cal();
             u_ctrl = struct('f', obj.command_force(),...
-                            'tau', obj.command_torque());
+                'tau', obj.command_torque());
+
+            if has_obs
+                % 계산 종료 후 시뮬레이터 물리 엔진을 위해 참값 원상복구
+                obj.RD.state = true_state;
+                obj.RD.R_tc = true_R_tc;
+            end
         end
 
         function ref_vel_cal(obj)
