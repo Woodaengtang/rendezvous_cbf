@@ -26,7 +26,6 @@ hocbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
                'h', simLogger.loggerBarrier.h.log(1,:));
 
 simCfg = SimCfg();
-controlCfg = ControlCfg();
 
 lyapunovFig = figure();
 lyapunovFig.Theme = 'light';
@@ -133,6 +132,92 @@ xlabel('Time (s)'); ylabel('h');
 ylim([-0.5, 5]);
 legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller'}, 'Location', 'northeast');
 
+%%
+load("assets\SCCBF\simLogger_20260325_213747.mat");
+PCCBF = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
+              'force', simLogger.loggerControl.force.log,...
+              'sig', simLogger.loggerRelative.state.log(1:3, :),...
+              'rho', simLogger.loggerRelative.state.log(7:9, :),...
+              'h', simLogger.loggerBarrier.h.log(1,:));
+
+load("assets\s_ccbf\simLogger_20260325_213350.mat");
+CCBF = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
+              'force', simLogger.loggerControl.force.log,...
+              'sig', simLogger.loggerRelative.state.log(1:3, :),...
+              'rho', simLogger.loggerRelative.state.log(7:9, :),...
+              'h', simLogger.loggerBarrier.h.log(1,:));
+
+phPlot = figure();
+phPlot.Theme = 'light';
+phPlot.Position(3:4) = [fig_size(1), fig_size(2)*1.5];
+t = tiledlayout(4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+ax1 = nexttile([2, 1]); 
+hold(ax1, 'on'); grid(ax1, 'on');
+p1 = plot(ax1, simCfg.sim_time, PCCBF.h, 'LineWidth', line_width);
+p2 = plot(ax1, simCfg.sim_time, CCBF.h, 'LineWidth', line_width);
+margin1 = plot(ax1, simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
+uistack(margin1, 'bottom');
+ylabel(ax1, 'h');
+legend(ax1, [p1, p2], {'PCCBF', 'CCBF'}, 'Location', 'northeast');
+ax2 = nexttile([1, 1]);
+hold(ax2, 'on'); grid(ax2, 'on');
+p1 = plot(ax2, simCfg.sim_time, PCCBF.h, 'LineWidth', line_width);
+p2 = plot(ax2, simCfg.sim_time, CCBF.h, 'LineWidth', line_width);
+margin1 = plot(ax2, simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
+ylim([-0.1, 0.5]);
+ylabel(ax2, 'h');
+ax3 = nexttile([1, 1]);
+hold(ax3, 'on'); grid(ax3, 'on');
+p1 = plot(ax3, simCfg.sim_time, PCCBF.h, 'LineWidth', line_width);
+p2 = plot(ax3, simCfg.sim_time, CCBF.h, 'LineWidth', line_width);
+margin1 = plot(ax3, simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
+ylim([-0.01, 0]);
+ylabel(ax3, 'h');
+xlabel(ax3, 'Time (s)');
+
+pccbf_traj = NaN([3, simCfg.sim_len]);
+ccbf_traj = NaN([3, simCfg.sim_len]);
+for i = 1:simCfg.sim_len
+    pccbf_sigma = PCCBF.sig(:, i);
+    pccbf_rho = PCCBF.rho(:, i);
+    pccbf_traj(:, i) = (get_R_tc(pccbf_sigma))'*pccbf_rho;
+
+    ccbf_sigma = CCBF.sig(:, i);
+    ccbf_rho = CCBF.rho(:, i);
+    ccbf_traj(:, i) = (get_R_tc(ccbf_sigma))'*ccbf_rho;
+end
+
+rtSPlot = figure();
+rtSPlot.Theme = 'light';
+rtSPlot.Position(3:4) = [1000, 800]; 
+
+t = tiledlayout(2, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+view_angles = {[-46.5, 25], [0, 0], [0, 90], [90, 0]};
+
+for i = 1:4
+    nexttile;
+    hold on; grid on;
+    
+    plot3(pccbf_traj(1, :), pccbf_traj(2, :), pccbf_traj(3, :), 'LineWidth', line_width);
+    plot3(ccbf_traj(1, :), ccbf_traj(2, :), ccbf_traj(3, :), 'LineWidth', line_width);
+    
+    trisurf(F, V(:,1), V(:,2), V(:,3), ...
+          'FaceColor', [0.7 0.7 0.7], ...
+          'EdgeColor', 'none', ...
+          'FaceLighting', 'gouraud');
+    view(view_angles{i});
+    camlight('headlight');
+    
+    xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
+    if i ~= 4
+        axis equal;
+    end
+    
+    if i == 1
+        legend({'PCCBF', 'CCBF'}, 'Location', 'northwest');
+    end
+end
 
 %%
 
