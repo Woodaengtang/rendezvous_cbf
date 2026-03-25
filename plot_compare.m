@@ -5,22 +5,25 @@ addpath(genpath(pwd));
 fig_size = [600, 450];
 line_width = 1.5;
 
-load('assets\nominal_clfqp\simLogger_20260312_184550.mat');
+load('assets\nominal_clfqp\simLogger_20260322_143716.mat');
 nominal = struct('sig', simLogger.loggerRelative.state.log(1:3, :),...
-                 'rho', simLogger.loggerRelative.state.log(7:9, :));
+                 'rho', simLogger.loggerRelative.state.log(7:9, :),...
+                 'h', simLogger.loggerBarrier.h.log(1,:));
 
 
-load('assets\ccbf\simLogger_20260313_125027.mat');
+load('assets\ccbf\simLogger_20260322_144038.mat');
 ccbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
               'force', simLogger.loggerControl.force.log,...
               'sig', simLogger.loggerRelative.state.log(1:3, :),...
-              'rho', simLogger.loggerRelative.state.log(7:9, :));
+              'rho', simLogger.loggerRelative.state.log(7:9, :),...
+              'h', simLogger.loggerBarrier.h.log(1,:));
 
-load('assets\hocbf\simLogger_20260313_125227.mat');
+load('assets\hocbf\simLogger_20260322_143825.mat');
 hocbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
                'force', simLogger.loggerControl.force.log,...
                'sig', simLogger.loggerRelative.state.log(1:3, :),...
-               'rho', simLogger.loggerRelative.state.log(7:9, :));
+               'rho', simLogger.loggerRelative.state.log(7:9, :),...
+               'h', simLogger.loggerBarrier.h.log(1,:));
 
 simCfg = SimCfg();
 controlCfg = ControlCfg();
@@ -79,37 +82,57 @@ for i = 1:simCfg.sim_len
     hocbf_traj(:, i) = (get_R_tc(hocbf_sigma))'*hocbf_rho;
 end
 
-rtPlot = figure();
-rtPlot.Theme = 'light';
-rtPlot.Position(3:4) = [947, 506];
-hold on; grid on;
-plot3(ccbf_traj(1, :), ccbf_traj(2, :), ccbf_traj(3, :), 'LineWidth', line_width);
-plot3(hocbf_traj(1, :), hocbf_traj(2, :), hocbf_traj(3, :), 'LineWidth', line_width);
-plot3(nominal_traj(1, :), nominal_traj(2, :), nominal_traj(3, :), 'LineWidth', line_width);
-% Surface plotting removed as requested
-
 meshData = readSurfaceMesh('SmallSat.glb');
-
 V = double(meshData.Vertices);
 F = double(meshData.Faces);
 V = (eul2rotm([-deg2rad(90), 0 ,0])*V')';
-
 scale_factor = 0.8; 
 V = V * scale_factor;
 
-trisurf(F, V(:,1), V(:,2), V(:,3), ...
-      'FaceColor', [0.7 0.7 0.7], ...
-      'EdgeColor', 'none', ...
-      'FaceLighting', 'gouraud');
+rtPlot = figure();
+rtPlot.Theme = 'light';
+rtPlot.Position(3:4) = [1000, 800]; 
 
-camlight('headlight');
-legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller'}, 'Location', 'best');
+t = tiledlayout(2, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 
-% view(3);
-view([-26.5, 25.5])
-xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
-% xlim([-5, 30]); ylim([-20, 20]); zlim([-20, 20]);
-axis equal;
+view_angles = {[-46.5, 25], [0, 0], [0, 90], [90, 0]};
+
+for i = 1:4
+    nexttile;
+    hold on; grid on;
+    
+    plot3(ccbf_traj(1, :), ccbf_traj(2, :), ccbf_traj(3, :), 'LineWidth', line_width);
+    plot3(hocbf_traj(1, :), hocbf_traj(2, :), hocbf_traj(3, :), 'LineWidth', line_width);
+    plot3(nominal_traj(1, :), nominal_traj(2, :), nominal_traj(3, :), 'LineWidth', line_width);
+    
+    trisurf(F, V(:,1), V(:,2), V(:,3), ...
+          'FaceColor', [0.7 0.7 0.7], ...
+          'EdgeColor', 'none', ...
+          'FaceLighting', 'gouraud');
+    view(view_angles{i});
+    camlight('headlight');
+    
+    xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
+    if i ~= 4
+        axis equal;
+    end
+    
+    if i == 1
+        legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller'}, 'Location', 'northwest');
+    end
+end
+
+hPlot = figure();
+hPlot.Theme = 'light';
+hPlot.Position(3:4) = fig_size;
+hold on; grid on;
+plot(simCfg.sim_time, ccbf.h, 'LineWidth', line_width);
+plot(simCfg.sim_time, hocbf.h, 'LineWidth', line_width);
+plot(simCfg.sim_time, nominal.h, 'LineWidth', line_width);
+xlabel('Time (s)'); ylabel('h');
+ylim([-0.5, 5]);
+legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller'}, 'Location', 'northeast');
+
 
 %%
 
