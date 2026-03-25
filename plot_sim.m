@@ -242,14 +242,14 @@ if sim_flag
     targetPos.Name = pos_name;
     targetAtt = timeseries(eul2quat(simLogger.loggerTarget.state.log(7:9, :)'), simCfg.sim_time);
     targetAtt.Name = att_name;
-    target_sat = satellite(sc, targetPos, Name='Target_Sat');
+    target_sat = satellite(sc, targetPos, Name='Sateliite_Target');
     pointAt(target_sat, targetAtt);
 
     chaserPos = timeseries(simLogger.loggerChaser.pos.log(1:3, :)', simCfg.sim_time);
     chaserPos.Name = pos_name;
     chaserAtt = timeseries(eul2quat(simLogger.loggerChaser.att.log(1:3, :)'), simCfg.sim_time);
     chaserAtt.Name = att_name;
-    chaser_sat = satellite(sc, chaserPos, Name='Chaser_Sat');
+    chaser_sat = satellite(sc, chaserPos, Name='Sateliite_Chaser');
     pointAt(chaser_sat, chaserAtt);
 
     ScenarioViewer = satelliteScenarioViewer(sc, CameraReferenceFrame='Inertial');

@@ -24,28 +24,11 @@ classdef SCCBF < CCBF
         end
         
         function u_ctrl = command(obj)
-            % =========================================================
-            % [상태 스왑 (State Swapping) 트릭]
-            % 명목 제어기와 편미분 함수들이 관측 상태(Observed state)를 
-            % 기반으로 계산되도록, 잠시 참값을 관측값으로 덮어씁니다.
-            % =========================================================
-            true_state = obj.RD.state;
-            true_R_tc = obj.RD.R_tc;
-            
-            % 제어기가 인식하는 관측 상태 대입
-            obj.RD.state = obj.RD.state_obs;
-            obj.RD.R_tc = obj.RD.get_R_tc(obj.RD.state_obs(1:3));
-            
-            % 모든 계산은 이제 관측값(Noisy data) 기반으로 이루어짐
             obj.partial_rho_t();
             obj.ref_vel_cal();
             obj.ref_omg_cal();
             u_ctrl = struct('f', obj.command_force(),...
                             'tau', obj.command_torque());
-                            
-            % 계산 종료 후, 시뮬레이터 로깅을 위해 다시 참값으로 원상복구
-            obj.RD.state = true_state;
-            obj.RD.R_tc = true_R_tc;
         end
         
         function ref_vel_cal(obj)
@@ -73,7 +56,7 @@ classdef SCCBF < CCBF
             if exitflag ~= 1, v_safe = obj.vel_nom; end
             obj.ref_vel = v_safe;
         end
-        
+
         function input_F = command_force(obj)
             obj.f_nom = command_force@ClfQp(obj);
             w_t = obj.RD.Target.stateECI(10:12);
