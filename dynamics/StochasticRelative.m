@@ -55,8 +55,8 @@ classdef StochasticRelative < RelativeDynamics
             % Gaussian noise
             w_rho = normrnd(obj.mu_rho, obj.w_sig_rho, [3, 1]);
             w_vel = normrnd(obj.mu_vel, obj.w_sig_vel, [3, 1]);
-            w_mrp = normrnd(obj.mu_rho, obj.w_sig_rho, [3, 1]);
-            w_omg = normrnd(obj.mu_vel, obj.w_sig_vel, [3, 1]);
+            w_mrp = normrnd(obj.mu_mrp, obj.w_sig_mrp, [3, 1]);
+            w_omg = normrnd(obj.mu_omg, obj.w_sig_omg, [3, 1]);
 
             
             % Colored Gaussian Noise after 1st order LPF
