@@ -1,5 +1,4 @@
 *.asv
-assets/
 *temp.m
 
 # Byte-compiled / optimized / DLL files
