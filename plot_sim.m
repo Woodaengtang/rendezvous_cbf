@@ -55,20 +55,20 @@ attPlot.Theme = 'light';
 attPlot.Position(3:4) = fig_size;
 subplot(3, 1, 1);
 hold on; grid on;
-att = plot(simCfg.sim_time, rad2deg(simLogger.loggerRelative.state.log(1,:)), 'LineWidth', line_width);
+att = plot(simCfg.sim_time, simLogger.loggerRelative.state.log(1,:), 'LineWidth', line_width);
 rfa = plot(simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
-ylabel('\sigma_x (deg)', 'Interpreter', 'tex');
+ylabel('\sigma_x', 'Interpreter', 'tex');
 legend([att, rfa], {'Response', 'Reference'});
 subplot(3, 1, 2);
 hold on; grid on;
-plot(simCfg.sim_time, rad2deg(simLogger.loggerRelative.state.log(2,:)), 'LineWidth', line_width);
+plot(simCfg.sim_time, simLogger.loggerRelative.state.log(2,:), 'LineWidth', line_width);
 plot(simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
-ylabel('\sigma_y (deg)', 'Interpreter', 'tex');
+ylabel('\sigma_y', 'Interpreter', 'tex');
 subplot(3, 1, 3);
 hold on; grid on;
-plot(simCfg.sim_time, rad2deg(simLogger.loggerRelative.state.log(3,:)), 'LineWidth', line_width);
+plot(simCfg.sim_time, simLogger.loggerRelative.state.log(3,:), 'LineWidth', line_width);
 plot(simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
-ylabel('\sigma_z (deg)', 'Interpreter', 'tex');
+ylabel('\sigma_z', 'Interpreter', 'tex');
 xlabel('Time (s)', 'Interpreter', 'tex');
 saveas(gcf, 'assets/att_plot.png');
 
@@ -198,7 +198,7 @@ rtPlot.Theme = 'light';
 rtPlot.Position(3:4) = fig_size;
 hold on; grid on;
 plot3(rt(1, :), rt(2, :), rt(3, :), 'LineWidth', line_width);
-% surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.3, 'FaceColor', 'r');
+% surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'FaceColor', 'r');
 
 meshData = readSurfaceMesh('SmallSat.glb');
 

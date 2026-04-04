@@ -91,22 +91,22 @@ quiver3(target_pos(1), target_pos(2), target_pos(3), ...
 axis equal;
 set(gca, 'XTickLabel', [], 'YTickLabel', [], 'ZTickLabel', []);
 
-% assetsDir = fullfile(pwd, 'assets');
-% if ~exist(assetsDir, 'dir')
-%     mkdir(assetsDir);
-% end
-% 
-% timestamp = datestr(now, 'yyyymmdd_HHMMSS');
-% filename = fullfile(assetsDir, ['figure_' timestamp '.png']);
-% 
-% set(FrameFig, 'Renderer', 'painters'); 
-% origUnits = FrameFig.Units;
-% FrameFig.Units = 'pixels';
-% figPos = FrameFig.Position;
-% FrameFig.PaperUnits = 'points';
-% FrameFig.PaperPosition = [0 0 figPos(3) figPos(4)];
-% FrameFig.PaperSize = [figPos(3) figPos(4)];
-% FrameFig.Units = origUnits;
-% 
-% print(FrameFig, filename, '-dpng', '-r300');
-% fprintf('Saved high-resolution figure to: %s\n', filename);
+assetsDir = fullfile(pwd, 'assets');
+if ~exist(assetsDir, 'dir')
+    mkdir(assetsDir);
+end
+
+timestamp = datestr(now, 'yyyymmdd_HHMMSS');
+filename = fullfile(assetsDir, ['figure_' timestamp '.png']);
+
+set(FrameFig, 'Renderer', 'painters'); 
+origUnits = FrameFig.Units;
+FrameFig.Units = 'pixels';
+figPos = FrameFig.Position;
+FrameFig.PaperUnits = 'points';
+FrameFig.PaperPosition = [0 0 figPos(3) figPos(4)];
+FrameFig.PaperSize = [figPos(3) figPos(4)];
+FrameFig.Units = origUnits;
+
+print(FrameFig, filename, '-dpng', '-r300');
+fprintf('Saved high-resolution figure to: %s\n', filename);

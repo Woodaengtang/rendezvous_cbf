@@ -5,20 +5,20 @@ addpath(genpath(pwd));
 fig_size = [600, 450];
 line_width = 1.5;
 
-load('assets\nominal_clfqp\simLogger_20260322_143716.mat');
+load('assets\nominal_clfqp\simLogger_20260326_085923.mat');
 nominal = struct('sig', simLogger.loggerRelative.state.log(1:3, :),...
                  'rho', simLogger.loggerRelative.state.log(7:9, :),...
                  'h', simLogger.loggerBarrier.h.log(1,:));
 
 
-load('assets\ccbf\simLogger_20260322_144038.mat');
+load('assets\ccbf\simLogger_20260326_090134.mat');
 ccbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
               'force', simLogger.loggerControl.force.log,...
               'sig', simLogger.loggerRelative.state.log(1:3, :),...
               'rho', simLogger.loggerRelative.state.log(7:9, :),...
               'h', simLogger.loggerBarrier.h.log(1,:));
 
-load('assets\hocbf\simLogger_20260322_143825.mat');
+load('assets\hocbf\simLogger_20260326_090025.mat');
 hocbf = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
                'force', simLogger.loggerControl.force.log,...
                'sig', simLogger.loggerRelative.state.log(1:3, :),...
@@ -133,14 +133,14 @@ ylim([-0.5, 5]);
 legend({'Cascaded CBF', 'HOCBF', 'Nominal Controller'}, 'Location', 'northeast');
 
 %%
-load("assets\SCCBF\simLogger_20260325_213747.mat");
+load("assets\s_PCCBF\simLogger_20260326_092938.mat");
 PCCBF = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
               'force', simLogger.loggerControl.force.log,...
               'sig', simLogger.loggerRelative.state.log(1:3, :),...
               'rho', simLogger.loggerRelative.state.log(7:9, :),...
               'h', simLogger.loggerBarrier.h.log(1,:));
 
-load("assets\s_ccbf\simLogger_20260325_213350.mat");
+load("assets\s_CCBF\simLogger_20260326_092805.mat");
 CCBF = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
               'force', simLogger.loggerControl.force.log,...
               'sig', simLogger.loggerRelative.state.log(1:3, :),...
@@ -150,7 +150,7 @@ CCBF = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
 phPlot = figure();
 phPlot.Theme = 'light';
 phPlot.Position(3:4) = [fig_size(1), fig_size(2)*1.5];
-t = tiledlayout(4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+t = tiledlayout(3, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 ax1 = nexttile([2, 1]); 
 hold(ax1, 'on'); grid(ax1, 'on');
 p1 = plot(ax1, simCfg.sim_time, PCCBF.h, 'LineWidth', line_width);
@@ -164,16 +164,9 @@ hold(ax2, 'on'); grid(ax2, 'on');
 p1 = plot(ax2, simCfg.sim_time, PCCBF.h, 'LineWidth', line_width);
 p2 = plot(ax2, simCfg.sim_time, CCBF.h, 'LineWidth', line_width);
 margin1 = plot(ax2, simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
-ylim([-0.1, 0.5]);
+ylim([-0.2, 1]);
 ylabel(ax2, 'h');
-ax3 = nexttile([1, 1]);
-hold(ax3, 'on'); grid(ax3, 'on');
-p1 = plot(ax3, simCfg.sim_time, PCCBF.h, 'LineWidth', line_width);
-p2 = plot(ax3, simCfg.sim_time, CCBF.h, 'LineWidth', line_width);
-margin1 = plot(ax3, simCfg.sim_time, zeros(simCfg.sim_len, 1), 'r--', 'LineWidth', line_width);
-ylim([-0.01, 0]);
-ylabel(ax3, 'h');
-xlabel(ax3, 'Time (s)');
+xlabel(ax2, 'Time (s)');
 
 pccbf_traj = NaN([3, simCfg.sim_len]);
 ccbf_traj = NaN([3, simCfg.sim_len]);
