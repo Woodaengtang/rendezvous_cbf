@@ -198,7 +198,7 @@ rtPlot.Theme = 'light';
 rtPlot.Position(3:4) = fig_size;
 hold on; grid on;
 plot3(rt(1, :), rt(2, :), rt(3, :), 'LineWidth', line_width);
-% surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.3, 'FaceColor', 'r');
+% surf(X, Y, Z, 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'FaceColor', 'r');
 
 meshData = readSurfaceMesh('SmallSat.glb');
 

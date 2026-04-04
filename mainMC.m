@@ -1,5 +1,5 @@
 close all; clear; clc;
-rng(0); % 재현성을 위한 시드 고정
+rng(0);
 addpath(genpath(pwd));
 
 N_mc = 500;

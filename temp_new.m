@@ -1,7 +1,6 @@
 close all; clear; clc;
 addpath(genpath(pwd));
 
-% --- 학술 논문용 전역 그래픽 설정 ---
 fig_size = [600, 675]; 
 line_width = 1.5;
 set(groot, 'defaultAxesTickLabelInterpreter', 'latex');
@@ -9,10 +8,8 @@ set(groot, 'defaultLegendInterpreter', 'latex');
 set(groot, 'defaultTextInterpreter', 'latex');
 set(groot, 'defaultAxesFontSize', 12); 
 
-% 색상 및 선 스타일 지정 (PCCBF 단독)
 color_pccbf = '#0072BD';  style_pccbf = '-';   
 
-% --- 데이터 로드 ---
 load('assets\s_PCCBF\simLogger_20260326_092938.mat');
 PCCBF = struct('lyapunov', simLogger.loggerLyapunov.V.log,...
                'force', simLogger.loggerControl.force.log,...
@@ -27,22 +24,18 @@ simCfg = SimCfg();
 f_bound = 20; % Control saturation bound (N)
 m_bound = 5;  % Control Moment saturation bound (Nm)
 
-% --- Trajectory Data Computation ---
 pccbf_traj = NaN([3, simCfg.sim_len]);
 for i = 1:simCfg.sim_len
     pccbf_traj(:, i) = (get_R_tc(PCCBF.sig(:, i)))' * PCCBF.rho(:, i);
 end
 
-% 3D 메쉬 데이터 로드
 meshData = readSurfaceMesh('SmallSat.glb');
 V_mesh = double(meshData.Vertices);
 F_mesh = double(meshData.Faces);
 V_mesh = (eul2rotm([-deg2rad(90), 0 ,0])*V_mesh')';
 V_mesh = V_mesh * 0.8; 
 
-% =========================================================================
-% 1. Standalone 3D Trajectory (1x2)
-% =========================================================================
+%%
 rtPlot = figure('Theme', 'light', 'Position', [50, 50, 1200, 450]); 
 t_rt = tiledlayout(1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 view_angles = {[-35.5, 25], [0, 0]};
@@ -55,14 +48,11 @@ for i = 1:2
     if i ~= 2, axis(ax, 'equal'); end
     if i == 1, legend(ax, {'PCCBF'}, 'Location', 'northwest'); end
 end
-% =========================================================================
-% 2~7. Standalone States & Controls (3x1)
-% =========================================================================
-% [수정] 목표 타겟 값 배열 추가
+
 rho_targets = [1, 0, 0];
 sig_targets = [0, 0, 0];
-vel_targets = [0, 0, 0]; % 필요시 사용
-omg_targets = [0, 0, 0]; % 필요시 사용
+vel_targets = [0, 0, 0];
+omg_targets = [0, 0, 0];
 
 rhoFig = plot_3x1_alone(simCfg.sim_time, PCCBF.rho, {'$\rho_x$ (m)', '$\rho_y$ (m)', '$\rho_z$ (m)'}, 'PCCBF', color_pccbf, line_width, fig_size, rho_targets);
 velFig = plot_3x1_alone(simCfg.sim_time, PCCBF.vel, {'$v_x$ (m/s)', '$v_y$ (m/s)', '$v_z$ (m/s)'}, 'PCCBF', color_pccbf, line_width, fig_size, vel_targets);
@@ -72,9 +62,7 @@ omgFig = plot_3x1_alone(simCfg.sim_time, PCCBF.omg, {'$\omega_x$ (rad/s)', '$\om
 forceFig  = plot_3x1_alone_sat(simCfg.sim_time, PCCBF.force, {'$F_x$ (N)', '$F_y$ (N)', '$F_z$ (N)'}, 'PCCBF', color_pccbf, line_width, fig_size, f_bound);
 momentFig = plot_3x1_alone_sat(simCfg.sim_time, PCCBF.moment, {'$M_x$ (Nm)', '$M_y$ (Nm)', '$M_z$ (Nm)'}, 'PCCBF', color_pccbf, line_width, fig_size, m_bound);
 
-% =========================================================================
-% 8. Lyapunov Function Value (2x1)
-% =========================================================================
+%%
 lypFig = figure('Theme', 'light', 'Position', [400, 400, fig_size]);
 t_lyp = tiledlayout(2, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 
@@ -88,9 +76,8 @@ plot(ax_v2, simCfg.sim_time, PCCBF.lyapunov(2,:), style_pccbf, 'Color', color_pc
 ylabel(ax_v2, '$V_v$');
 xlabel(ax_v2, 'Time (s)');
 
-% =========================================================================
-% 9. Control Barrier Function Value (3x1: Full + Zoom)
-% =========================================================================
+
+%%
 hFig = figure('Theme', 'light', 'Position', [450, 450, fig_size]);
 t_h = tiledlayout(3, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 
