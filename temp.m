@@ -6,7 +6,7 @@ line_width = 1.5;
 set(groot, 'defaultAxesTickLabelInterpreter', 'latex');
 set(groot, 'defaultLegendInterpreter', 'latex');
 set(groot, 'defaultTextInterpreter', 'latex');
-set(groot, 'defaultAxesFontSize', 12); 
+set(groot, 'defaultAxesFontSize', 12);
 
 color_ccbf = '#0072BD';  style_ccbf = '-';   
 color_hocbf = '#D95319'; style_hocbf = '--'; 

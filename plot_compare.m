@@ -5,6 +5,11 @@ addpath(genpath(pwd));
 fig_size = [600, 450];
 line_width = 1.5;
 
+set(groot, 'defaultAxesTickLabelInterpreter', 'latex');
+set(groot, 'defaultLegendInterpreter', 'latex');
+set(groot, 'defaultTextInterpreter', 'latex');
+set(groot, 'defaultAxesFontSize', 10);
+
 load('assets\nominal_clfqp\simLogger_20260326_085923.mat');
 nominal = struct('sig', simLogger.loggerRelative.state.log(1:3, :),...
                  'rho', simLogger.loggerRelative.state.log(7:9, :),...
@@ -34,13 +39,13 @@ subplot(2, 1, 1);
 hold on; grid on;
 CcbfLyp = plot(simCfg.sim_time, ccbf.lyapunov(1,:), 'LineWidth', line_width);
 HocbfLyp = plot(simCfg.sim_time, hocbf.lyapunov(1,:), 'LineWidth', line_width);
-ylabel('V_\rho'); legend([CcbfLyp, HocbfLyp], {'Cascaded CBF', 'HOCBF'}, 'Location', 'northeast');
+ylabel('$V_\rho$'); legend([CcbfLyp, HocbfLyp], {'Cascaded CBF', 'HOCBF'}, 'Location', 'northeast');
 
 subplot(2, 1, 2);
 hold on; grid on;
 plot(simCfg.sim_time, ccbf.lyapunov(2,:), 'LineWidth', line_width);
 plot(simCfg.sim_time, hocbf.lyapunov(2,:), 'LineWidth', line_width);
-ylabel('V_v');
+ylabel('$V_v$');
 
 inputFig = figure();
 inputFig.Theme = 'light';
@@ -49,20 +54,20 @@ subplot(3, 1, 1);
 hold on; grid on;
 plot(simCfg.sim_time, ccbf.force(1,:), 'LineWidth', line_width);
 plot(simCfg.sim_time, hocbf.force(1,:), 'LineWidth', line_width);
-ylabel('F_x');
+ylabel('$F_x$');
 legend({'Cascaded CBF', 'HOCBF'}, 'Location', 'northeast');
 
 subplot(3, 1, 2);
 hold on; grid on;
 plot(simCfg.sim_time, ccbf.force(2,:), 'LineWidth', line_width);
 plot(simCfg.sim_time, hocbf.force(2,:), 'LineWidth', line_width);
-ylabel('F_y');
+ylabel('$F_y$');
 
 subplot(3, 1, 3);
 hold on; grid on;
 plot(simCfg.sim_time, ccbf.force(3,:), 'LineWidth', line_width);
 plot(simCfg.sim_time, hocbf.force(3,:), 'LineWidth', line_width);
-ylabel('F_z');
+ylabel('$F_z$');
 
 nominal_traj = NaN([3, simCfg.sim_len]);
 ccbf_traj = NaN([3, simCfg.sim_len]);
@@ -111,7 +116,7 @@ for i = 1:4
     view(view_angles{i});
     camlight('headlight');
     
-    xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
+    xlabel('$x_t$ [m]'); ylabel('$y_t$ [m]'); zlabel('$z_t$ [m]');
     if i ~= 4
         axis equal;
     end
@@ -202,7 +207,7 @@ for i = 1:4
     view(view_angles{i});
     camlight('headlight');
     
-    xlabel('x_t [m]'); ylabel('y_t [m]'); zlabel('z_t [m]');
+    xlabel('$x_t$ [m]'); ylabel('$y_t$ [m]'); zlabel('$z_t$ [m]');
     if i ~= 4
         axis equal;
     end
